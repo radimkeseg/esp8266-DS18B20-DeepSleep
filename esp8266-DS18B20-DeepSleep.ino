@@ -9,17 +9,17 @@
 #include <WiFiClient.h>
 #include <OneWire.h> 
 #include <DallasTemperature.h>
-#include <Interval.h>
+#include "Interval.h"
 #include <ThingSpeak.h>
 
-#define TEMP_BUS 2       // DHT Shield uses pin D4 (GPIO2)
+#define TEMP_BUS 2       //(GPIO2)
 
 OneWire oneWire(TEMP_BUS); 
 DallasTemperature sensors(&oneWire);
 
-// ThingSpeak
-unsigned long myChannelNumber = 211292;
-const char * myWriteAPIKey = "CHF36K1C8B6YQUV4";
+// www.ThingSpeak.com
+unsigned long myChannelNumber = 999999 //!!! set your channel number !!!
+const char * myWriteAPIKey = "XXXXXXXXXXXXXXXX"; //!!! set you write api key !!!
 
 // WiFi settings
 const char* ssid = "VilaRuzi";
@@ -44,8 +44,7 @@ void write_ThingsSpeak(){
   Serial.println(" °C");
 
   //send data to thingSpeak
-  ThingSpeak.setField(5,temperature);
-  //ThingSpeak.setField(4,humidity);
+  ThingSpeak.setField(3,temperature); //!!!! change field number !!!
   ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);        
 }
 
