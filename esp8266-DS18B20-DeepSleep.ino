@@ -22,8 +22,8 @@ unsigned long myChannelNumber = 999999 //!!! set your channel number !!!
 const char * myWriteAPIKey = "XXXXXXXXXXXXXXXX"; //!!! set you write api key !!!
 
 // WiFi settings
-const char* ssid = "VilaRuzi";
-const char* password = "666tumaM";
+const char* ssid = "SSID";
+const char* password = "password";
 
 // Time to sleep (in seconds):
 const int sleepTimeS = 10*60;
