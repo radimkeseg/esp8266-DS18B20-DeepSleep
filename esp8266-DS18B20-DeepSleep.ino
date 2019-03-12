@@ -28,27 +28,40 @@ long update_interval = 600*1000; //default 10 min
 bool isInSetupMode = false;
 
 #define SETUP_PIN 0      //(GPIO0)
-#define TEMP_BUS 2       //(GPIO2)
+#define TX 1
+#define RX 3
 
 #define AP_NAME "DigiTemp-v3"
 
+void blink(signed int count){
+    for(int x=0; x<count; x++){
+     digitalWrite(TX,HIGH);
+     delay(500); 
+     digitalWrite(TX,LOW);
+     delay(500); 
+    }  
+}
 
 void setup() 
 {
 
   // Serial
   Serial.begin(9600);
+  WiFi.hostname(AP_NAME);
 
+  delay(500);
   pinMode(SETUP_PIN, INPUT); 
-  pinMode(TEMP_BUS, OUTPUT);
-  
-  if ( digitalRead(SETUP_PIN) == LOW ) { //when 0/LOW go to setup mode - no deep sleep
-    isInSetupMode = true;
-    Serial.println("manual config portal triggered");
-    myWifi.forceManualConfig((String(AP_NAME)+"-Config").c_str());
-    Serial.println("connecting again ...)");
-  }
 
+  for(int i=0; i<100; i++){
+    if ( digitalRead(SETUP_PIN) == LOW ) { //when 0/LOW go to setup mode - no deep sleep
+      isInSetupMode = true;
+      blink(3);
+      Serial.println("manual config portal triggered");
+      myWifi.forceManualConfig((String(AP_NAME)+"-"+String(ESP.getChipId(), HEX)+"-Config").c_str());
+      Serial.println("connecting again ...)");
+    }
+    delay(50);
+  }
 
   myDallas.begin();
 

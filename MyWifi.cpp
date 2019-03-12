@@ -40,7 +40,7 @@ void MyWifi::handle_root()
 
 
 void MyWifi::handle_store_settings(){
-  if(server->arg("_dst")==NULL && server->arg("_timeoffset")==NULL ){
+  if(server->arg("_ts")==NULL ){
     Serial.println("setting page refreshed only, no params");      
   }else{
     Serial.println("settings changed");  
@@ -75,7 +75,8 @@ void MyWifi::setDataHandler(fncHandleData fDataHandler){
 void MyWifi::restart(unsigned int inSec){
     delay(inSec*1000);
     //reset and try again, or maybe put it to deep sleep
-    Serial.print("restart in "); Serial.print(inSec); Serial.println(" sec");    
+    Serial.print("restart in "); Serial.print(inSec); Serial.println(" sec"); 
+    pinMode(0, OUTPUT);   
     digitalWrite(0,HIGH);  //from some reason this has to be set before reset|restart https://github.com/esp8266/Arduino/issues/1017
     ESP.reset();
     delay(5000);  

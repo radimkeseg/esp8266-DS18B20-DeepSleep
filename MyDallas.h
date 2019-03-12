@@ -23,7 +23,7 @@ SOFTWARE.
 
 #pragma once
 
-#define TEMP_BUS 14 //=D5 
+#define TEMP_BUS 2 //(GPIO2) 
 #define NOT_MEASURED -128
 
 #include <OneWire.h> 

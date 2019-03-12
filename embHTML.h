@@ -157,7 +157,7 @@ label.title{
 </head>
 
 <body>
-<h1>Electro OsmoZis v2</h1>
+<h1>DigiTemp v3</h1>
 <p style='text-align: right'>by Radim Keseg</p>
 
 <form method='post' action='offset'>
