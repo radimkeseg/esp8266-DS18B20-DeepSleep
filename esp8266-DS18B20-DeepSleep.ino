@@ -33,35 +33,31 @@ bool isInSetupMode = false;
 
 #define AP_NAME "DigiTemp-v3"
 
-void blink(signed int count){
-    for(int x=0; x<count; x++){
-     digitalWrite(TX,HIGH);
-     delay(500); 
-     digitalWrite(TX,LOW);
-     delay(500); 
-    }  
-}
-
 void setup() 
 {
-
   // Serial
   Serial.begin(9600);
-  WiFi.hostname(AP_NAME);
 
+  pinMode(SETUP_PIN, OUTPUT); 
+  digitalWrite(SETUP_PIN,HIGH);
   delay(500);
+  pinMode(TX, OUTPUT);
   pinMode(SETUP_PIN, INPUT); 
 
-  for(int i=0; i<100; i++){
-    if ( digitalRead(SETUP_PIN) == LOW ) { //when 0/LOW go to setup mode - no deep sleep
+  WiFi.hostname(AP_NAME);
+  digitalWrite(TX,LOW);
+  for(int i=0; i<6; i++){//blink 3 times
+    if ( digitalRead(SETUP_PIN) == LOW ) { //when 0/LOW go to wifi setup mode
       isInSetupMode = true;
-      blink(3);
+      digitalWrite(TX,LOW);
       Serial.println("manual config portal triggered");
       myWifi.forceManualConfig((String(AP_NAME)+"-"+String(ESP.getChipId(), HEX)+"-Config").c_str());
-      Serial.println("connecting again ...)");
+      //after the force Manual Config the ESP restarts
     }
-    delay(50);
+    digitalWrite(TX,i%2);
+    delay(500);
   }
+  digitalWrite(TX,HIGH);
 
   myDallas.begin();
 
@@ -75,7 +71,25 @@ void setup()
 
   update_interval = ((myWifi.getCustomSettings().settings.TS_UPDATE_INTERVAL<=0)?(600):(myWifi.getCustomSettings().settings.TS_UPDATE_INTERVAL)); //default 10 min
   
-  delay(1000);
+  delay(500);
+  
+  pinMode(SETUP_PIN, OUTPUT); 
+  digitalWrite(SETUP_PIN,HIGH);
+  delay(500);
+  pinMode(TX, OUTPUT);
+  pinMode(SETUP_PIN, INPUT); 
+
+  for(int i=0;i<30; i++){ //blink 15 times
+    if ( digitalRead(SETUP_PIN) == LOW ) { //when 0/LOW go to no sleep mode
+      isInSetupMode = true;
+      digitalWrite(TX,LOW);
+      Serial.println("no sleep mode triggered");
+      break;
+    }
+    digitalWrite(TX,i%2);
+    delay(100);
+  }
+  if(!isInSetupMode) digitalWrite(TX,HIGH); //keep the blue if no sleep mode
 }
 
 void loop() 
