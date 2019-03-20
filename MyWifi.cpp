@@ -40,6 +40,7 @@ void MyWifi::handle_root()
 
 
 void MyWifi::handle_store_settings(){
+  cs.settings.THINGSPEAK = server->arg("_ts").length()>0;
   if(server->arg("_ts")==NULL ){
     Serial.println("setting page refreshed only, no params");      
   }else{
@@ -52,9 +53,9 @@ void MyWifi::handle_store_settings(){
     cs.settings.TS_FIELD_TEMP = atoi(server->arg("_ts_field_temp").c_str());
     cs.settings.TS_UPDATE_INTERVAL = atoi(server->arg("_ts_update_interval").c_str());
 
-    cs.print();          
-    cs.write();
   }
+  cs.print();          
+  cs.write();
   server->send(200, "text/html", "OK - restart");
   
   restart(1);

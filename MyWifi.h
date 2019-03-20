@@ -38,7 +38,7 @@ SOFTWARE.
 #include <ESP8266HTTPUpdateServer.h>    
 
 // HOSTNAME for OTA update
-#define HOSTNAME "OSMOZA-RKG1-"
+#define HOSTNAME "DIGITEMP-V3-"
 
 typedef String (*fncHandleData)();
 

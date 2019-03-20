@@ -28,7 +28,7 @@ long update_interval = 600*1000; //default 10 min
 bool isInSetupMode = false;
 
 #define SETUP_PIN 0      //(GPIO0)
-#define TX 1
+#define TX 1             //LED_BUILTIN
 #define RX 3
 
 #define AP_NAME "DigiTemp-v3"
@@ -36,14 +36,14 @@ bool isInSetupMode = false;
 void setup() 
 {
   // Serial
-  Serial.begin(9600);
+  Serial.begin(115200);
+  Serial.println("MAC: " + myWifi.getMAC());
 
   pinMode(SETUP_PIN, OUTPUT); 
   digitalWrite(SETUP_PIN,HIGH);
   delay(500);
-  pinMode(TX, OUTPUT);
   pinMode(SETUP_PIN, INPUT); 
-
+  pinMode(TX, OUTPUT);
   WiFi.hostname(AP_NAME);
   digitalWrite(TX,LOW);
   for(int i=0; i<6; i++){//blink 3 times
@@ -58,7 +58,7 @@ void setup()
     delay(500);
   }
   digitalWrite(TX,HIGH);
-
+  
   myDallas.begin();
 
   myWifi.setup(AP_NAME,60); //1 min to configure the WIFI 
@@ -89,6 +89,7 @@ void setup()
     digitalWrite(TX,i%2);
     delay(100);
   }
+
   if(!isInSetupMode) digitalWrite(TX,HIGH); //keep the blue if no sleep mode
 }
 
