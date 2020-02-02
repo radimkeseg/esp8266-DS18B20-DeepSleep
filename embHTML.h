@@ -322,7 +322,7 @@ function refresh() {
   xmlHttp.send();
 }
 
-var tempGauge = createVerGauge('temp', -20, 60, ' °C').setVal(0).setColor(getTempColor(0));
+var tempGauge = createVerGauge('temp', -20, 60, '°C').setVal(0).setColor(getTempColor(0));
 
 function ts_checkbox(){
   var checkBox = document.getElementById('_ts');
@@ -349,3 +349,4 @@ setTimeout(onLoad, 500);
 </body>
 </html>
 )=====";
+
