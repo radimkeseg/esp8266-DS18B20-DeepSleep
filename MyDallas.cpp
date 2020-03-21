@@ -42,3 +42,4 @@ float MyDallas::getLastMeasured(){
   return last_temp;
 }
 
+

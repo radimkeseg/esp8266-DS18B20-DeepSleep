@@ -120,3 +120,4 @@ void loop()
     ESP.deepSleep(update_interval * 1000000);
   }
 }
+

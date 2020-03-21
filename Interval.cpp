@@ -38,3 +38,4 @@ void Interval::set(uint32_t tmout)
 uint32_t Interval::getTimeout(){
     return timeout;	
 }
+

@@ -60,3 +60,4 @@ void MyThingSpeak::write(float temperature){
 
 }
 
+

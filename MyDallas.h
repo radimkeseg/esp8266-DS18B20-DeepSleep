@@ -51,3 +51,4 @@ public:
   float getLastMeasured();
   float measure();
 };
+

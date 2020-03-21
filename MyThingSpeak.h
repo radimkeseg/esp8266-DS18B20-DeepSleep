@@ -50,3 +50,4 @@ public:
    void write(float temperature);
 };
 
+

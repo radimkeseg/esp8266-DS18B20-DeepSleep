@@ -30,3 +30,4 @@ class Interval
 
 #endif
 // EOF
+

@@ -73,3 +73,4 @@ void CustomSettings::print(){
     Serial.print("update interval: "); Serial.print(settings.TS_UPDATE_INTERVAL); Serial.println("s");
 }
 
+
