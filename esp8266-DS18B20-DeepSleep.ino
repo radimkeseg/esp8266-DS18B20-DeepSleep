@@ -30,11 +30,11 @@ Interval measurementUpdate;
 long update_interval = 600*1000; //default 10 min
 bool isInSetupMode = false;
 
-#define SETUP_PIN 0      //(GPIO0)
+#define SETUP_PIN 0      //GPIO0
 #define TX 1             //LED_BUILTIN
 #define RX 3
 /* //node mcu test and debug
-#define SETUP_PIN D7      //(GPIO0)
+#define SETUP_PIN D7      //GPIO0
 #define TX LED_BUILTIN
 #define RX D7
 */
@@ -112,6 +112,7 @@ void loop()
 {
   // Handle web server
   myWifi.handleClient();
+  myPubSub->handleClient();
   
   if(measurementUpdate.expired()){ //read if the update interval has expired only
     measurementUpdate.set(update_interval*1000); // set new interval period 
@@ -132,13 +133,13 @@ void loop()
   }
   
   yield();
-  delay(1000); //just to give some time, reaction to http requests might be a bit delayed, but OK
+  delay(500); //just to give some time, reaction to http requests might be a bit delayed, but OK
 
-/*
-  if(!isInSetupMode){ //if not in setup mode then measure and deep sleep
+
+  if(!isInSetupMode && myWifi.getCustomSettings().settings.GS_DEEP_SLEEP){ //if not in setup mode then measure and deep sleep (if deep sleep enabled)
     // Sleep
     Serial.println("ESP8266 in sleep mode");
     ESP.deepSleep(update_interval * 1000000);
   }
-*/  
+  
 }

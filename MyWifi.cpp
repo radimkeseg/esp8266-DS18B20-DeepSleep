@@ -43,6 +43,8 @@ void MyWifi::handle_root()
   if (cs.settings.GS) content.replace("{gs}", "checked='checked'");
   else content.replace("{gs}", "");
   content.replace("{gs_update_interval}", String(cs.settings.GS_UPDATE_INTERVAL).c_str() );
+  if (cs.settings.GS_DEEP_SLEEP) content.replace("{gs_deep_sleep}", "checked='checked'");
+  else content.replace("{gs_deep_sleep}", "");
 
 
   if (cs.settings.THINGSPEAK) content.replace("{ts}", "checked='checked'");
@@ -72,6 +74,7 @@ void MyWifi::handle_store_settings(){
 
     cs.settings.GS = server->arg("_gs").length()>0;       
     cs.settings.GS_UPDATE_INTERVAL = atoi(server->arg("_gs_update_interval").c_str());
+    cs.settings.GS_DEEP_SLEEP = server->arg("_gs_deep_sleep").length()>0;       
 
     cs.settings.THINGSPEAK = server->arg("_ts").length()>0;       
     cs.settings.TS_CHANNEL = atol(server->arg("_ts_channel").c_str());

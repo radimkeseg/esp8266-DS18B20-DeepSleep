@@ -209,6 +209,7 @@ label.title{
 <div class='btn-group'>
 <table>
 <tr><td><label>Update interval (s)</label></td><td><input id='_gs_update_interval' name='_gs_update_interval' length=4 pattern='^[0-9]{1,16}$' required value='{gs_update_interval}'></td></tr>
+<tr><td><label><input id='_gs_deep_sleep' name='_gs_deep_sleep' type='checkbox' {gs_deep_sleep}>Deep Sleep</label></td></tr>
 </table>
 </div>
 
@@ -404,6 +405,7 @@ var tempGauge = createVerGauge('temp', -20, 60, '°C').setVal(0).setColor(getTem
 function gs_checkbox(){
   var checkBox = document.getElementById('_gs');  
   document.getElementById("_gs_update_interval").disabled  = !checkBox.checked;
+  document.getElementById("_gs_deep_sleep").disabled  = !checkBox.checked;
   document.getElementById('_ts').disabled  = !checkBox.checked;
   document.getElementById('_mqtt').disabled  = !checkBox.checked;  
 }
