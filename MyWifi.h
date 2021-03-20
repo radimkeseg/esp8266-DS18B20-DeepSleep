@@ -61,6 +61,9 @@ private:
   fncHandleData fDataHandler;
   void handle_data();
 
+  boolean wifi_apply_hostname_(String hostname);
+
+
 public:
   MyWifi(){
     wifiManager = new WiFiManager();
@@ -89,4 +92,3 @@ public:
 
   void setDataHandler(fncHandleData fDataHandler);
 };
-

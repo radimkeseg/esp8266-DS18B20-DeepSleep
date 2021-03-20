@@ -49,5 +49,3 @@ public:
    void setup(unsigned long channelNumber, const char *writeAPIKey, unsigned int field_temp, unsigned int update_interval);
    void write(float temperature);
 };
-
-

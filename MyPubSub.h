@@ -1,6 +1,6 @@
 /**The MIT License (MIT)
 
-Copyright (c) 2019 by Radim Keseg
+Copyright (c) 2021 by Radim Keseg
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,53 +22,45 @@ SOFTWARE.
 */
 
 #pragma once
-#include <FS.h> 
 
-#define update_username "admin"
-#define update_password "admin"
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
 
-// TimeClient settings
-typedef struct
-{
-  boolean GS; //mesure periodically  
-  unsigned int GS_UPDATE_INTERVAL;  
 
-  boolean THINGSPEAK;
-  unsigned long TS_CHANNEL;
-  char TS_API_WRITE[17];
-  unsigned int TS_FIELD_TEMP;
+class MyPubSub{
+private:
+  WiFiClient *wfclient;
+  PubSubClient *psclient;
+  const char* mqtt_server = "";
+  const char* inTopic = "";
+  const char* outTopic = "";
 
-  boolean MQTT;
-  char MQTT_BROKER[256];
-  char MQTT_USER[256];
-  char MQTT_PASSWORD[256];
-  char MQTT_DEVICE_ID[256];
-  char MQTT_OUT_TOPIC[256];
-  char MQTT_IN_TOPIC[256];
+  const char* clientID = "";
+  const char* user = "";
+  const char* password = "";
+
+  void callback(char* topic, byte* payload, unsigned int length);
   
-} settings_t;
+public:
+  MyPubSub(WiFiClient& wfclient, const char* mqtt_server, const char* inTopic, const char* outTopic){
+    this->wfclient = &wfclient;
+    this->mqtt_server = mqtt_server;
+    this->inTopic = inTopic;
+    this->outTopic = outTopic;
+    psclient = new PubSubClient( wfclient );
+    
+  }
+  ~MyPubSub(){
+    if(psclient != NULL) delete psclient;
+  }
 
+  void setCredentials(const char* clientID, const char* user, const char* password);
 
-/***************************
- * End Settings
- **************************/
-
-class CustomSettings{
-  private:
-     const String CUSTOM_SETTINGS = "/settings/custom.txt";
+  void reconnect();
+  bool setup();
   
-  public:
-    settings_t settings;
-
-    CustomSettings(){
-      settings.GS = false;
-      settings.GS_UPDATE_INTERVAL=10*60;
-      settings.THINGSPEAK = false;
-      settings.MQTT = false;
-    }
-    void init();
-
-    void write();
-    void read();
-    void print();
-}; 
+  bool isConnected();
+  bool subscribe();
+  bool publish(const char* payload){ return publish(payload, false); };
+  bool publish(const char* payload, boolean retained);
+};

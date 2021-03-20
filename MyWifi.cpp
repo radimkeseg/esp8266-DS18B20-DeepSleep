@@ -24,35 +24,67 @@ SOFTWARE.
 #include "MyWifi.h"
 #include "settings.h"
 
+boolean MyWifi::wifi_apply_hostname_(String hostname) {
+  Serial.print("Sett wifi station hostname: ");
+  Serial.println(hostname.c_str());  
+  bool ret = wifi_station_set_hostname(const_cast<char *>(hostname.c_str()));
+  if (!ret) {
+    Serial.println("Setting WiFi Hostname failed!");
+  }
+  return ret;
+}
+
+
+
 void MyWifi::handle_root()
 {
   String content = FPSTR(PAGE_INDEX);      
 
+  if (cs.settings.GS) content.replace("{gs}", "checked='checked'");
+  else content.replace("{gs}", "");
+  content.replace("{gs_update_interval}", String(cs.settings.GS_UPDATE_INTERVAL).c_str() );
+
+
   if (cs.settings.THINGSPEAK) content.replace("{ts}", "checked='checked'");
-  else    content.replace("{ts}", "");
+  else content.replace("{ts}", "");
   content.replace("{ts_channel}", String(cs.settings.TS_CHANNEL).c_str() );
   content.replace("{ts_write_api_key}", String(cs.settings.TS_API_WRITE).c_str() );
   content.replace("{ts_field_temp}", String(cs.settings.TS_FIELD_TEMP).c_str() );
-  content.replace("{ts_update_interval}", String(cs.settings.TS_UPDATE_INTERVAL).c_str() );
+
+  if (cs.settings.MQTT) content.replace("{mqtt}", "checked='checked'");
+  else content.replace("{mqtt}", "");
+  content.replace("{mqtt_broker}", String(cs.settings.MQTT_BROKER).c_str() );
+  content.replace("{mqtt_user}", String(cs.settings.MQTT_USER).c_str() );
+  content.replace("{mqtt_password}", String(cs.settings.MQTT_PASSWORD).c_str() );
+  content.replace("{mqtt_device_id}", String(cs.settings.MQTT_DEVICE_ID).c_str() );
+  content.replace("{mqtt_otopic}", String(cs.settings.MQTT_OUT_TOPIC).c_str() );
+  content.replace("{mqtt_itopic}", String(cs.settings.MQTT_IN_TOPIC).c_str() );
   
   server->send(200, "text/html", content);
 } 
 
 
 void MyWifi::handle_store_settings(){
-  cs.settings.THINGSPEAK = server->arg("_ts").length()>0;
-  if(server->arg("_ts")==NULL ){
+  if(server->arg("_gs")==NULL ){
     Serial.println("setting page refreshed only, no params");      
   }else{
     Serial.println("settings changed");  
 
-    cs.settings.THINGSPEAK = server->arg("_ts").length()>0;
-        
+    cs.settings.GS = server->arg("_gs").length()>0;       
+    cs.settings.GS_UPDATE_INTERVAL = atoi(server->arg("_gs_update_interval").c_str());
+
+    cs.settings.THINGSPEAK = server->arg("_ts").length()>0;       
     cs.settings.TS_CHANNEL = atol(server->arg("_ts_channel").c_str());
     strncpy(cs.settings.TS_API_WRITE, server->arg("_ts_write_api_key").c_str(), 17); 
     cs.settings.TS_FIELD_TEMP = atoi(server->arg("_ts_field_temp").c_str());
-    cs.settings.TS_UPDATE_INTERVAL = atoi(server->arg("_ts_update_interval").c_str());
 
+    cs.settings.MQTT = server->arg("_mqtt").length()>0;       
+    strncpy(cs.settings.MQTT_BROKER, server->arg("_mqtt_broker").c_str(), 256); 
+    strncpy(cs.settings.MQTT_USER, server->arg("_mqtt_user").c_str(), 256); 
+    strncpy(cs.settings.MQTT_PASSWORD, server->arg("_mqtt_password").c_str(), 256); 
+    strncpy(cs.settings.MQTT_DEVICE_ID, server->arg("_mqtt_device_id").c_str(), 256); 
+    strncpy(cs.settings.MQTT_OUT_TOPIC, server->arg("_mqtt_otopic").c_str(), 256); 
+    strncpy(cs.settings.MQTT_IN_TOPIC, server->arg("_mqtt_itopic").c_str(), 256);   
   }
   cs.print();          
   cs.write();
@@ -148,7 +180,7 @@ void MyWifi::setup(const char* APname, int timeout_in_sec){
     
       //user setting handling
       server->on("/", std::bind(&MyWifi::handle_root, this));
-      server->on("/offset", std::bind(&MyWifi::handle_store_settings,this)); 
+      server->on("/setup", std::bind(&MyWifi::handle_store_settings,this)); 
       server->on("/data",  std::bind(&MyWifi::handle_data,this)); 
     
       server->begin(); 
@@ -176,5 +208,3 @@ WiFiClient& MyWifi::getWifiClient(){
 CustomSettings& MyWifi::getCustomSettings(){
    return cs;
 }
-
-

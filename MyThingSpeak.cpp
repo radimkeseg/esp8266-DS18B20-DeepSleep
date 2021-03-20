@@ -30,13 +30,9 @@ void MyThingSpeak::write_internal(float temparature){
     return;
   }
 
-  Serial.println("ThingsSpeak write");
-  Serial.println("=================");
-  Serial.println("-----------------");
   Serial.print("Temperature: ");
   Serial.print(temparature);
   Serial.println("C");
-  Serial.println("-----------------");
 
   //send data to thingSpeak
   ThingSpeak.setField(field_temp,temparature);
@@ -59,5 +55,3 @@ void MyThingSpeak::write(float temperature){
   }
 
 }
-
-
