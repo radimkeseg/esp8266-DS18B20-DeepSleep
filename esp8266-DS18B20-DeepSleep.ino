@@ -129,7 +129,7 @@ void loop()
 
     if(myWifi.getCustomSettings().settings.MQTT){ //write to mqtt
       myPubSub->reconnect();
-      myPubSub->publish(stFncHandleData().c_str(),false);
+      myPubSub->publish(stFncHandleData().c_str(),true);
     }
   }
   
