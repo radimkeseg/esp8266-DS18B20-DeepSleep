@@ -30,10 +30,11 @@ Interval measurementUpdate;
 long update_interval = 600*1000; //default 10 min
 bool isInSetupMode = false;
 
+//esp01 -> generic8266 flash:1M+128k SPIFF
 #define SETUP_PIN 0      //GPIO0
 #define TX 1             //LED_BUILTIN
 #define RX 3
-/* //node mcu test and debug
+/*//node mcu test and debug
 #define SETUP_PIN D7      //GPIO0
 #define TX LED_BUILTIN
 #define RX D7

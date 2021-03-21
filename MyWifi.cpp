@@ -177,7 +177,13 @@ void MyWifi::setup(const char* APname, int timeout_in_sec){
   }else{     
       // OTA Setup
       WiFi.hostname(hostname);
-      MDNS.begin( (hostname+"-webupdate").c_str() );
+      
+      if( mdns.begin( (hostname) .c_str(), WiFi.localIP() ) ){
+         Serial.print("mDNS: "); Serial.print(hostname); Serial.print(".local = "); Serial.println(WiFi.localIP());
+      }else{
+         Serial.print("mDNS failed");
+      }
+      
       httpUpdater->setup(server, "/firmware", update_username, update_password );
     
     
@@ -189,7 +195,7 @@ void MyWifi::setup(const char* APname, int timeout_in_sec){
       server->begin(); 
       Serial.println("HTTP server started");
     
-      MDNS.addService("http", "tcp", 80); 
+      mdns.addService("http", "tcp", 80); 
   }
   
   Serial.println("reading settings ...");
