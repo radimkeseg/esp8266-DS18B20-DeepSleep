@@ -28,7 +28,7 @@ const char PAGE_INDEX[] PROGMEM = R"=====(
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Digi Temp v4</title>
+  <title>Digi Temp v3</title>
 
 
   <style>
@@ -150,91 +150,27 @@ label{
 label.title{
   width:150px;
   padding-left: 10px;
-  padding-right: 10px;
   border-radius: 10px 10px 0px 0px; 
   background-color: #feefc3;
 }
  </style>
- 
- <style>
-.password + .unmask {
-  position: realtive;
-  right: 10px;
-  top: 50%;
-  transform: translateY(0%);
-  text-indent: -9999px;
-  width: 25px;
-  height: 25px;
-  background: #ccc;
-  border-radius: 50%;
-  cursor:pointer;
-  border: none;
-  -webkit-appearance:none;
-}
-
-.password + .unmask:before {
-  content: "";
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  width: 15px;
-  height: 15px;
-  background: #e3e3e3;
-  z-index:1;
-  border-radius: 50%;
-}
-
-.password[type="text"] + .unmask:after {
-  content: "";
-  position: absolute;
-  top: 7px;
-  left: 7px;
-  width: 11px;
-  height: 11px;
-  background: #ccc;
-  z-index: 2;
-  border-radius: 50%;
-}
-
- </style>
 </head>
 
 <body>
-<h1>DigiTemp v4</h1>
+<h1>DigiTemp v3</h1>
 <p style='text-align: right'>by Radim Keseg</p>
 
-<form method='post' action='setup'>
+<form method='post' action='offset'>
 
-<label class='title'><input id='_gs' name='_gs' type='checkbox' {gs}>Measure and Send Periodically</label>
-<div class='btn-group'>
-<table>
-<tr><td><label>Update interval (s)</label></td><td><input id='_gs_update_interval' name='_gs_update_interval' length=4 pattern='^[0-9]{1,16}$' required value='{gs_update_interval}'></td></tr>
-</table>
-</div>
-
-<label class='title'><input id='_ts' name='_ts' type='checkbox' {ts}>Send to ThingSpeak</label>
+<label class='title'><input id='_ts' name='_ts' type='checkbox' {ts}>ThingSpeak</label>
 <div class='btn-group'>
 <table>
 <tr><td><label>Channel</label></td><td><input id='_ts_channel' name='_ts_channel' length=16 pattern='^[0-9]{1,16}$' required value='{ts_channel}'></td></tr>
 <tr><td><label>Write API Key</label></td><td><input id='_ts_write_api_key' name='_ts_write_api_key' length=16 pattern='^[0-9a-zA-Z]{16}$' required value='{ts_write_api_key}'></td></tr>
 <tr><td><label>Temperature Field #</label></td><td><input id='_ts_field_temp' name='_ts_field_temp' length=1 pattern='^[0-8]{1}$' required value='{ts_field_temp}'></td></tr>
+<tr><td><label>Update interval (s)</label></td><td><input id='_ts_update_interval' name='_ts_update_interval' length=4 pattern='^[0-9]{1,16}$' required value='{ts_update_interval}'></td></tr>
 </table>
 </div>
-
-<label class='title'><input id='_mqtt' name='_mqtt' type='checkbox' {mqtt}>Send to Home Assisstant / MQTT broker</label>
-<div class='btn-group'>
-<table>
-<tr><td><label>MQTT broker</label></td><td><input id='_mqtt_broker' name='_mqtt_broker' length=16 pattern='^.{1,255}$' required value='{mqtt_broker}'></td></tr>
-<tr><td><label>User</label></td><td><input id='_mqtt_user' name='_mqtt_user' length=16 pattern='^[0-9a-zA-Z_\.]{1,255}$' required value='{mqtt_user}'></td></tr>
-<tr><td><label>Password</label></td><td><input type='password' id='_mqtt_password' name='_mqtt_password' class='password' length=16 pattern='^.{1,255}$' required value='{mqtt_password}'><button class="unmask" type="button" title="Mask/Unmask password to check content" onClick="unmask('_mqtt_password')">Unmask</button></td></tr>
-<tr><td><label>DeviceID</label></td><td><input id='_mqtt_device_id' name='_mqtt_device_id' length=16 pattern='^[0-9a-z_]{1,255}$' required value='{mqtt_device_id}'></td></tr>
-<tr><td><label>Out Topic</label></td><td><input id='_mqtt_otopic' name='_mqtt_otopic' length=32 pattern='^[0-9a-z_/]{1,255}$' required value='{mqtt_otopic}'></td></tr>
-<tr><td><label>In Topic</label></td><td><input id='_mqtt_itopic' name='_mqtt_itopic' length=32 pattern='^[0-9a-z_/]{1,255}$' required value='{mqtt_itopic}'></td></tr>
-</table>
-</div>
-
-
-
 
 <input type='submit' value='Store' class='btn'></form>
 
@@ -254,19 +190,6 @@ label.title{
       </svg>
     </button>
   </div>
-  <script>
-/*
-  Switch actions
-*/
-function unmask(pass_id){
-  pass = document.getElementById(pass_id);
-  if(pass.getAttribute('type') == 'password')
-    pass.setAttribute('type','text');
-  else
-    pass.setAttribute('type','password');
-  return false;
-}  
-  </script>
 
   <script>
 function createRadGauge(id, minVal, maxVal, unit) {
@@ -401,41 +324,22 @@ function refresh() {
 
 var tempGauge = createVerGauge('temp', -20, 60, '°C').setVal(0).setColor(getTempColor(0));
 
-function gs_checkbox(){
-  var checkBox = document.getElementById('_gs');  
-  document.getElementById("_gs_update_interval").disabled  = !checkBox.checked;
-  document.getElementById('_ts').disabled  = !checkBox.checked;
-  document.getElementById('_mqtt').disabled  = !checkBox.checked;  
-}
-
 function ts_checkbox(){
-  var checkBox = document.getElementById('_ts');  
+  var checkBox = document.getElementById('_ts');
+  
   document.getElementById("_ts_channel").disabled  = !checkBox.checked;
   document.getElementById("_ts_write_api_key").disabled  = !checkBox.checked;
   document.getElementById("_ts_field_temp").disabled  = !checkBox.checked;
-}
-
-function mqtt_checkbox(){
-  var checkBox = document.getElementById('_mqtt');  
-  document.getElementById("_mqtt_broker").disabled  = !checkBox.checked;
-  document.getElementById("_mqtt_user").disabled  = !checkBox.checked;
-  document.getElementById("_mqtt_password").disabled  = !checkBox.checked;
-  document.getElementById("_mqtt_device_id").disabled  = !checkBox.checked;
-  document.getElementById("_mqtt_otopic").disabled  = !checkBox.checked;
-  document.getElementById("_mqtt_itopic").disabled  = !checkBox.checked;
+  document.getElementById("_ts_update_interval").disabled  = !checkBox.checked;
 }
 
 function onLoad(){
-  gs_checkbox();
   ts_checkbox();
-  mqtt_checkbox();
   refresh();
 }
 
 document.getElementById('refresh').addEventListener('click', refresh);
-document.getElementById('_gs').addEventListener('click',gs_checkbox);
 document.getElementById('_ts').addEventListener('click',ts_checkbox);
-document.getElementById('_mqtt').addEventListener('click',mqtt_checkbox);
 setTimeout(onLoad, 500);   
 
 //document.addEventListener('load', function(){ onLoad(); } );
@@ -445,3 +349,4 @@ setTimeout(onLoad, 500);
 </body>
 </html>
 )=====";
+

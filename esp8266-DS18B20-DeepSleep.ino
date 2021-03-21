@@ -15,9 +15,6 @@ MyThingSpeak myThingSpeak;
 #include "MyWifi.h"
 MyWifi myWifi; 
 
-#include "MyPubSub.h"
-MyPubSub *myPubSub;
-
 static String stFncHandleData(){
   String res;
   res = "{\"temp\":\"";
@@ -33,13 +30,8 @@ bool isInSetupMode = false;
 #define SETUP_PIN 0      //(GPIO0)
 #define TX 1             //LED_BUILTIN
 #define RX 3
-/* //node mcu test and debug
-#define SETUP_PIN D7      //(GPIO0)
-#define TX LED_BUILTIN
-#define RX D7
-*/
 
-#define AP_NAME "DigiTemp-v4"
+#define AP_NAME "DigiTemp-v3"
 
 void setup() 
 {
@@ -73,18 +65,11 @@ void setup()
   myWifi.setDataHandler( stFncHandleData );
 
   myThingSpeak.begin(myWifi.getWifiClient());
-  myThingSpeak.setup(myWifi.getCustomSettings().settings.TS_CHANNEL, myWifi.getCustomSettings().settings.TS_API_WRITE, myWifi.getCustomSettings().settings.TS_FIELD_TEMP, myWifi.getCustomSettings().settings.GS_UPDATE_INTERVAL);
+  myThingSpeak.setup(myWifi.getCustomSettings().settings.TS_CHANNEL, myWifi.getCustomSettings().settings.TS_API_WRITE, myWifi.getCustomSettings().settings.TS_FIELD_TEMP, myWifi.getCustomSettings().settings.TS_UPDATE_INTERVAL);
   
   myWifi.getCustomSettings().print();
 
-  update_interval = ((myWifi.getCustomSettings().settings.GS_UPDATE_INTERVAL<=0)?(600):(myWifi.getCustomSettings().settings.GS_UPDATE_INTERVAL)); //default 10 min
-
-
-  //for now hardcoded - need to add settings to have it customizable - similar to thingspeak settings
-  myPubSub = new MyPubSub(myWifi.getWifiClient(), myWifi.getCustomSettings().settings.MQTT_BROKER, myWifi.getCustomSettings().settings.MQTT_IN_TOPIC, myWifi.getCustomSettings().settings.MQTT_OUT_TOPIC );
-  myPubSub->setCredentials(myWifi.getCustomSettings().settings.MQTT_DEVICE_ID, myWifi.getCustomSettings().settings.MQTT_USER, myWifi.getCustomSettings().settings.MQTT_PASSWORD);
-  myPubSub->setup();
-
+  update_interval = ((myWifi.getCustomSettings().settings.TS_UPDATE_INTERVAL<=0)?(600):(myWifi.getCustomSettings().settings.TS_UPDATE_INTERVAL)); //default 10 min
   
   delay(500);
   
@@ -124,21 +109,15 @@ void loop()
         myThingSpeak.write(myDallas.getLastMeasured());
       }
     }
-
-    if(myWifi.getCustomSettings().settings.MQTT){ //write to mqtt
-      myPubSub->reconnect();
-      myPubSub->publish(stFncHandleData().c_str(),false);
-    }
+  
   }
   
-  yield();
   delay(1000); //just to give some time, reaction to http requests might be a bit delayed, but OK
 
-/*
   if(!isInSetupMode){ //if not in setup mode then measure and deep sleep
     // Sleep
     Serial.println("ESP8266 in sleep mode");
     ESP.deepSleep(update_interval * 1000000);
   }
-*/  
 }
+

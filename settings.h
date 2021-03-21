@@ -30,22 +30,11 @@ SOFTWARE.
 // TimeClient settings
 typedef struct
 {
-  boolean GS; //mesure periodically  
-  unsigned int GS_UPDATE_INTERVAL;  
-
   boolean THINGSPEAK;
   unsigned long TS_CHANNEL;
   char TS_API_WRITE[17];
   unsigned int TS_FIELD_TEMP;
-
-  boolean MQTT;
-  char MQTT_BROKER[256];
-  char MQTT_USER[256];
-  char MQTT_PASSWORD[256];
-  char MQTT_DEVICE_ID[256];
-  char MQTT_OUT_TOPIC[256];
-  char MQTT_IN_TOPIC[256];
-  
+  unsigned int TS_UPDATE_INTERVAL;  
 } settings_t;
 
 
@@ -61,10 +50,8 @@ class CustomSettings{
     settings_t settings;
 
     CustomSettings(){
-      settings.GS = false;
-      settings.GS_UPDATE_INTERVAL=10*60;
       settings.THINGSPEAK = false;
-      settings.MQTT = false;
+      settings.TS_UPDATE_INTERVAL=10*60;
     }
     void init();
 
@@ -72,3 +59,6 @@ class CustomSettings{
     void read();
     void print();
 }; 
+
+
+

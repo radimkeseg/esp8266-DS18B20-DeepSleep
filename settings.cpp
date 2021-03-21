@@ -65,21 +65,12 @@ void CustomSettings::read(){
     Serial.println("reading custom setting end");
 }
 
-void CustomSettings::print(){   //need to update in case of change 
-    Serial.println("Measurement Period");
-    Serial.print(" update interval: "); Serial.print(settings.GS_UPDATE_INTERVAL); Serial.println("s");
-    
+void CustomSettings::print(){    
     Serial.println("ThingSpeak");
-    Serial.print(" channel: "); Serial.println(settings.TS_CHANNEL);
-    Serial.print(" write api key: "); Serial.println(settings.TS_API_WRITE);
-    Serial.print(" field temp #"); Serial.println(settings.TS_FIELD_TEMP);
-
-    Serial.println("MQTT");
-    Serial.print(" broker: "); Serial.println(settings.MQTT_BROKER);
-    Serial.print(" user: "); Serial.println(settings.MQTT_USER);
-    Serial.print(" password: "); Serial.println("***********");
-    Serial.print(" device ID: "); Serial.println(settings.MQTT_DEVICE_ID);
-    Serial.print(" out topic: "); Serial.println(settings.MQTT_OUT_TOPIC);
-    Serial.print(" in topic: "); Serial.println(settings.MQTT_IN_TOPIC);
-
+    Serial.print("channel: "); Serial.println(settings.TS_CHANNEL);
+    Serial.print("write api key: "); Serial.println(settings.TS_API_WRITE);
+    Serial.print("field temp #"); Serial.println(settings.TS_FIELD_TEMP);
+    Serial.print("update interval: "); Serial.print(settings.TS_UPDATE_INTERVAL); Serial.println("s");
 }
+
+
