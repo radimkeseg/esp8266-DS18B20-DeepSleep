@@ -23,8 +23,6 @@ SOFTWARE.
 
 #include "MyPubSub.h"
 
-#define ESP01_BUILTINLED  1
-
 void MyPubSub::callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -34,12 +32,10 @@ void MyPubSub::callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
 
-  //if message recieved just blink - hardcoded for ESP01
-  bool blink = digitalRead(ESP01_BUILTINLED);
-  for(int i=0; i<4; i++){
-    digitalWrite(ESP01_BUILTINLED, blink=!blink);
-    delay(200);
-  }
+  //if message recieved just blink
+  digitalWrite(BUILTIN_LED, HIGH);
+  delay(500);
+  digitalWrite(BUILTIN_LED, LOW);
 }
 
 void MyPubSub::setCredentials(const char* clientID, const char* user, const char* password){
@@ -84,10 +80,6 @@ bool MyPubSub::isConnected(){
 
 bool MyPubSub::subscribe(){
   return psclient->subscribe(inTopic);
-}
-
-void MyPubSub::handleClient(){
-  psclient->loop();  
 }
 
 bool MyPubSub::publish(const char* payload, boolean retained) {

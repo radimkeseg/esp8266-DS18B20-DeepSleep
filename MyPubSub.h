@@ -58,7 +58,6 @@ public:
 
   void reconnect();
   bool setup();
-  void handleClient();
   
   bool isConnected();
   bool subscribe();

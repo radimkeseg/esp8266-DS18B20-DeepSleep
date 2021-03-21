@@ -68,7 +68,6 @@ void CustomSettings::read(){
 void CustomSettings::print(){   //need to update in case of change 
     Serial.println("Measurement Period");
     Serial.print(" update interval: "); Serial.print(settings.GS_UPDATE_INTERVAL); Serial.println("s");
-    Serial.print(" deep sleep: "); Serial.print(settings.GS_DEEP_SLEEP); Serial.println("");
     
     Serial.println("ThingSpeak");
     Serial.print(" channel: "); Serial.println(settings.TS_CHANNEL);

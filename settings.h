@@ -30,9 +30,8 @@ SOFTWARE.
 // TimeClient settings
 typedef struct
 {
-  boolean GS; //mesure periodically and send 
-  unsigned int GS_UPDATE_INTERVAL;
-  boolean GS_DEEP_SLEEP;  
+  boolean GS; //mesure periodically  
+  unsigned int GS_UPDATE_INTERVAL;  
 
   boolean THINGSPEAK;
   unsigned long TS_CHANNEL;
@@ -63,7 +62,6 @@ class CustomSettings{
 
     CustomSettings(){
       settings.GS = false;
-      settings.GS_DEEP_SLEEP=false;
       settings.GS_UPDATE_INTERVAL=10*60;
       settings.THINGSPEAK = false;
       settings.MQTT = false;
