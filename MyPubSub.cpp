@@ -51,16 +51,25 @@ void MyPubSub::setCredentials(const char* clientID, const char* user, const char
 
 void MyPubSub::reconnect(){
   // Loop until we're reconnected
+  int attempt = 1;
+  bool reconnected = false;
+  
   if (!psclient->connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (psclient->connect(clientID, user, password)) { //hardcoded needs to be fixed
-      Serial.println("connected");
-      subscribe();
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(psclient->state());
+    while(attempt<=3 && !reconnected){
+      if (psclient->connect(clientID, user, password)) { //hardcoded needs to be fixed
+        Serial.println("connected");
+        reconnected = true;
+        subscribe();
+      } else {
+        Serial.print("attempt #");
+        Serial.print(attempt);
+        Serial.print(" failed, rc=");
+        Serial.println(psclient->state());
+      }
     }
+    attempt++;
   }
   psclient->loop();
 }
