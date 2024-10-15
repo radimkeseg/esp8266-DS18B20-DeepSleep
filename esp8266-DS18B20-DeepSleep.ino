@@ -3,99 +3,143 @@
  * inspiration
  * https://openhomeautomation.net/esp8266-battery/
  */
+
  
 // Library
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-#include <OneWire.h> 
-#include <DallasTemperature.h>
-#include "Interval.h"
-#include <ThingSpeak.h>
+#include "MyDallas.h"
+MyDallas myDallas;
 
-#define TEMP_BUS 2       //(GPIO2)
+#include "MyThingSpeak.h"
+MyThingSpeak myThingSpeak;
 
-OneWire oneWire(TEMP_BUS); 
-DallasTemperature sensors(&oneWire);
+#include "MyWifi.h"
+MyWifi myWifi; 
 
-// www.ThingSpeak.com
-unsigned long myChannelNumber = 999999 //!!! set your channel number !!!
-const char * myWriteAPIKey = "XXXXXXXXXXXXXXXX"; //!!! set you write api key !!!
+#include "MyPubSub.h"
+MyPubSub *myPubSub;
 
-// WiFi settings
-const char* ssid = "SSID"; //!!! set your WIFI name !!!
-const char* password = "password"; //!!! set your WIFI password !!!
-
-// Time to sleep (in seconds):
-const int sleepTimeS = 10*60;
-
-void write_ThingsSpeak(){
-
-  float temperature; // raw values from sensors
-  temperature = read_temp();
-
-  if (isnan(temperature))
-  {
-    Serial.println("Failed to read from DS18B20 sensor!");
-    return;
-  }
-
-  Serial.print("Temperature: ");
-  Serial.print(temperature);
-  Serial.println(" °C");
-
-  //send data to thingSpeak
-  ThingSpeak.setField(3,temperature); //!!!! change field number !!!
-  ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);        
+static String stFncHandleData(){
+  String res;
+  res = "{\"temp\":\"";
+  res += myDallas.getLastMeasured();
+  res += "\"}";
+  return res;
 }
 
-float  read_temp(){
- sensors.requestTemperatures(); // Send the command to get temperature readings 
- Serial.print("Temperature: "); 
- float value_temp=sensors.getTempCByIndex(0); // Why "byIndex"?
- Serial.print(value_temp);   
- Serial.println("C");   
+Interval measurementUpdate;
+long update_interval = 600*1000; //default 10 min
+bool isInSetupMode = false;
 
- return value_temp;
-}
+//esp01 -> generic8266 flash:1M+128k SPIFF
+#define SETUP_PIN 0      //GPIO0
+#define TX 1             //LED_BUILTIN
+#define RX 3
+/*//node mcu test and debug
+#define SETUP_PIN D7      //GPIO0
+#define TX LED_BUILTIN
+#define RX D7
+*/
+
+#define AP_NAME "DigiTemp-v4"
 
 void setup() 
 {
-
   // Serial
-  Serial.begin(9600);
-  Serial.println("ESP8266 in normal mode");
-  
-  // Connect to WiFi
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  
-  Serial.println("");
-  Serial.println("WiFi connected");
-  
-  // Print the IP address
-  Serial.println(WiFi.localIP()); 
+  Serial.begin(115200);
+  Serial.println("MAC: " + myWifi.getMAC());
 
-  sensors.begin();
+  pinMode(SETUP_PIN, OUTPUT); 
+  digitalWrite(SETUP_PIN,HIGH);
+  delay(500);
+  pinMode(SETUP_PIN, INPUT); 
+  pinMode(TX, OUTPUT);
+  WiFi.hostname(AP_NAME);
+  digitalWrite(TX,LOW);
+  for(int i=0; i<6; i++){//blink 3 times
+    if ( digitalRead(SETUP_PIN) == LOW ) { //when 0/LOW go to wifi setup mode
+      isInSetupMode = true;
+      digitalWrite(TX,LOW);
+      Serial.println("manual config portal triggered");
+      myWifi.forceManualConfig((String(AP_NAME)+"-"+String(ESP.getChipId(), HEX)+"-Config").c_str());
+      //after the force Manual Config the ESP restarts
+    }
+    digitalWrite(TX,i%2);
+    delay(500);
+  }
+  digitalWrite(TX,HIGH);
+  
+  myDallas.begin();
+
+  myWifi.setup(AP_NAME,60); //1 min to configure the WIFI 
+  myWifi.setDataHandler( stFncHandleData );
+
+  myThingSpeak.begin(myWifi.getWifiClient());
+  myThingSpeak.setup(myWifi.getCustomSettings().settings.TS_CHANNEL, myWifi.getCustomSettings().settings.TS_API_WRITE, myWifi.getCustomSettings().settings.TS_FIELD_TEMP, myWifi.getCustomSettings().settings.GS_UPDATE_INTERVAL);
+  
+  myWifi.getCustomSettings().print();
+
+  update_interval = ((myWifi.getCustomSettings().settings.GS_UPDATE_INTERVAL<=0)?(600):(myWifi.getCustomSettings().settings.GS_UPDATE_INTERVAL)); //default 10 min
+
+
+  myPubSub = new MyPubSub(myWifi.getWifiClient(), myWifi.getCustomSettings().settings.MQTT_BROKER, myWifi.getCustomSettings().settings.MQTT_IN_TOPIC, myWifi.getCustomSettings().settings.MQTT_OUT_TOPIC );
+  myPubSub->setCredentials(myWifi.getCustomSettings().settings.MQTT_DEVICE_ID, myWifi.getCustomSettings().settings.MQTT_USER, myWifi.getCustomSettings().settings.MQTT_PASSWORD);
+  myPubSub->setup();
+
+  
+  delay(500);
+  
+  pinMode(SETUP_PIN, OUTPUT); 
+  digitalWrite(SETUP_PIN,HIGH);
+  delay(500);
+  pinMode(TX, OUTPUT);
+  pinMode(SETUP_PIN, INPUT); 
+
+  for(int i=0;i<30; i++){ //blink 15 times
+    if ( digitalRead(SETUP_PIN) == LOW ) { //when 0/LOW go to no sleep mode
+      isInSetupMode = true;
+      digitalWrite(TX,LOW);
+      Serial.println("no sleep mode triggered");
+      break;
+    }
+    digitalWrite(TX,i%2);
+    delay(100);
+  }
+
+  if(!isInSetupMode) digitalWrite(TX,HIGH); //keep the blue if no sleep mode
 }
 
 void loop() 
 {
-  // Use WiFiClient class to create TCP connections
-  WiFiClient wfclient;
+  // Handle web server
+  myWifi.handleClient();
+  myPubSub->handleClient();
+  
+  if(measurementUpdate.expired()){ //read if the update interval has expired only
+    measurementUpdate.set(update_interval*1000); // set new interval period 
 
-  //setup thingSpeak
-  Serial.println("start sending data to ThingSpeak.com");
-  ThingSpeak.begin(wfclient);
-  write_ThingsSpeak();
-  Serial.println("end sending data to ThingSpeak.com");
+    Serial.println("Reading sensors:");
+    myDallas.measure();
+        
+    if(myWifi.getCustomSettings().settings.THINGSPEAK){ //write to thingspeak
+      if(myWifi.isConnected()){
+        myThingSpeak.write(myDallas.getLastMeasured());
+      }
+    }
 
-  Serial.println();
-  Serial.println("closing connection");
+    if(myWifi.getCustomSettings().settings.MQTT){ //write to mqtt
+      myPubSub->reconnect();
+      myPubSub->publish(stFncHandleData().c_str(),true);
+    }
+  }
+  
+  yield();
+  delay(500); //just to give some time, reaction to http requests might be a bit delayed, but OK
 
-  // Sleep
-  Serial.println("ESP8266 in sleep mode");
-  ESP.deepSleep(sleepTimeS * 1000000);
+
+  if(!isInSetupMode && myWifi.getCustomSettings().settings.GS_DEEP_SLEEP){ //if not in setup mode then measure and deep sleep (if deep sleep enabled)
+    // Sleep
+    Serial.println("ESP8266 in sleep mode");
+    ESP.deepSleep(update_interval * 1000000);
+  }
+  
 }
